@@ -1,0 +1,87 @@
+from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score,mean_squared_error,roc_curve, auc
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import numpy as np
+import joblib
+from sklearn.metrics import confusion_matrix,precision_score,f1_score,classification_report
+df=pd.read_csv("final_dataset+target+ema.csv")
+features = [
+    "pice/ema50",
+    "stopdist_short",
+    "stopdist_long",
+    "Prob_Regime0",
+]
+
+target = "target"
+split = int(len(df) * 0.7)
+X_train = df[features].iloc[:split]
+X_test  = df[features].iloc[split:]
+y_train = df[target].iloc[:split]
+y_test  = df[target].iloc[split:]
+
+rf = RandomForestClassifier(
+    n_estimators=300,      # number of trees
+    max_depth=3,           # limit depth to reduce overfitting (small dataset)
+    min_samples_split=5,   # minimum samples to split a node
+    min_samples_leaf=3,    # minimum samples in leaf
+    max_features=0.8,      # number of features considered at each split
+    random_state=42,
+    n_jobs=-1              # use all cores
+)
+
+# Train
+rf.fit(X_train, y_train)
+# Save it!:
+joblib.dump(rf, "rf_30day_model.pkl")
+# Predict
+y_prob = rf.predict_proba(X_test)[:, 1] #i need this 
+y_pred = (y_prob >= 0.55).astype(int) #0.4 0.6 i lke 51 52 55:0.67 ,0.46 f1=54 54 :0.65   0.53   f1=58   ; 52: 0.64      0.63  f1=63
+df_test = df.iloc[split:].copy()  # 891 rows 55 best 
+
+df_test["ml_prob"] = y_prob
+df_test.to_csv("final_dataset_with_RF.csv", index=False)
+
+# Evaluate
+print(confusion_matrix(y_test, y_pred))
+f1 = f1_score(y_test, y_pred)
+print(classification_report(y_test, y_pred))
+print("F1 Score:", f1)
+
+import matplotlib.pyplot as plt
+
+importances = rf.feature_importances_
+for f, imp in zip(features, importances):
+    print(f, ":", round(imp,4))
+
+# Optional plot
+plt.barh(features, importances)
+plt.title("Random Forest Feature Importance")
+
+plt.savefig("RF Feature Importance.png")
+y_prob = rf.predict_proba(X_test)[:, 1]  # probability of class 1 (up move)
+# Compute ROC curve
+fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+roc_auc = auc(fpr, tpr)
+
+# Plot
+plt.figure(figsize=(6,6))
+plt.plot(fpr, tpr, color='blue', lw=2, label=f'ROC curve (AUC = {roc_auc:.2f})')
+plt.plot([0, 1], [0, 1], color='red', lw=2, linestyle='--')  # diagonal line
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve for Random Forest')
+plt.legend(loc="lower right")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("roc_curve.png")  # saves it as a PNG
+#plt.show()
+print(df_test["ml_prob"].describe())
+
+
+
+
+

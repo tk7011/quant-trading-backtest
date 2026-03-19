@@ -1,0 +1,35 @@
+import pandas as pd
+import numpy as np
+import glob
+from sklearn.preprocessing import StandardScaler
+
+files=glob.glob("folder_for_glob/*.csv")
+dfs=[]
+
+for file in files:
+    df=pd.read_csv(file, parse_dates=["Date"],index_col="Date")
+    dfs.append(df)
+
+merged=pd.concat(dfs, axis=1)
+# Select only the columns you want
+merged = merged=pd.concat(dfs, axis=1)
+[[
+    "Returns",
+    "Volume",
+    "High","Low",
+    "stopdist_long",
+    "stopdist_short",
+    "Signal",
+    "Regime_2",
+    "Prob_Regime0",
+    "Prob_Regime1",
+    "ROC_5",
+    "ROC_22",
+    
+]]
+merged = merged.dropna()
+merged.to_csv("final_dataset.csv")
+
+
+
+
