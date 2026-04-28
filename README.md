@@ -1,2 +1,2 @@
 # quant-trading-backtest
-https://docs.google.com/document/d/1ENFzKydpyqml9MjpFtCEu_bq49ziSo7pxM55rvmvT2c/edit?usp=sharing
+https://docs.google.com/document/d/14J2hpcrwCAiSKRRCv7kIlDMwnhSBsKjay4-zH2lBdJU/edit?usp=sharing
