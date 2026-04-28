@@ -1,9 +1,0 @@
-import numpy as np
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
-df=pd.read_csv("final_dataset+ema.csv")
-df["target_1d"] = df["Close"].pct_change(periods=1).shift(-1)
-df["target"] = (df["Returns"].rolling(30).sum().shift(-30) > 0).astype(int)
-df=df.dropna()
-df.to_csv("final_dataset+target+ema.csv")
-#####################################################
